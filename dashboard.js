@@ -1,53 +1,54 @@
 import { fetchVisits } from './api.js';
 
+/**
+ * Récupère dynamiquement la liste des visites et l'injecte dans la table HTML du tableau de bord.
+ */
 export const renderVisitsTable = async () => {
     const tableBody = document.querySelector('#visits-table tbody');
     if (!tableBody) return;
 
     try {
-        // Message d'attente
+        // Rendu d'un état de chargement pour l'utilisateur
         tableBody.innerHTML = '<tr><td colspan="7">Chargement des données...</td></tr>';
         
-        // Récupération des données depuis WordPress
-        const visites = await fetchVisits();
+        // Requête vers le endpoint de l'API REST
+        const visits = await fetchVisits();
         
-        // On vide le tableau
+        // Nettoyage de la table avant injection
         tableBody.innerHTML = '';
 
-        if (visites.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7">Aucune visite trouvée.</td></tr>';
+        if (visits.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7">Aucune visite en cours trouvée.</td></tr>';
             return;
         }
 
-        // Boucle sur chaque visite
-        visites.forEach(visite => {
-            const acf = visite.acf || {};
-            const details = visite.details_complets || {};
-            const visiteur = details.visiteur || {};
+        // Itération et construction dynamique des lignes de données
+        visits.forEach(visit => {
+            const acf = visit.acf || {};
+            const details = visit.details_complets || {};
+            const visitor = details.visiteur || {};
             
-            // Variables par défaut pour la cible et le local
-            let cibleAffichee = '-';
-            let localAffiche = '-';
+            let displayedTarget = '-';
+            let displayedRoom = '-';
 
-            // Logique conditionnelle : Personnel OU Formation
+            // Logique d'affichage dynamique selon le motif (Personnel VS Formation)
             if (details.personnel) {
-                cibleAffichee = `Personnel: ${details.personnel['personnel-nom']}`;
-                localAffiche = details.personnel['personnel-local'];
+                displayedTarget = `Personnel : ${details.personnel['personnel-nom']}`;
+                displayedRoom = details.personnel['personnel-local'] || details.personnel['local'];
             } else if (details.formation) {
-                cibleAffichee = `Formation: ${details.formation['formation-nom']}`;
-                localAffiche = details.formation['formation-local'];
+                displayedTarget = `Formation : ${details.formation['formation-nom']}`;
+                displayedRoom = details.formation['formation-local'];
             }
 
-            // Création de la ligne HTML
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${visiteur['visiteur-prenom'] || '-'}</td>
-                <td>${visiteur['visiteur-nom'] || '-'}</td>
+                <td>${visitor['visiteur-prenom'] || '-'}</td>
+                <td>${visitor['visiteur-nom'] || '-'}</td>
                 <td>${acf.date || '-'}</td>
                 <td>${acf.heure_entree || '-'}</td>
                 <td>${acf.heure_sortie || '-'}</td>
-                <td>${cibleAffichee}</td>
-                <td>${localAffiche}</td>
+                <td>${displayedTarget}</td>
+                <td>${displayedRoom}</td>
             `;
             
             tableBody.appendChild(tr);
