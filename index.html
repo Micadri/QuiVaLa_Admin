@@ -3,14 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Admin</title>
+     <script type="module" src="main.js"></script>
 </head>
 <body>
-    <h1>Tableau de bord "Qui est là ?"</h1>
+    <h1>Tableau de bord "Qui Va Là ?"</h1>
     
     <h2 id="welcome-message"></h2>
-    
     <button id="logout-btn">Se déconnecter</button>
 
-    <script type="module" src="main.js"></script>
+    <hr>
+
+    <table border="1" id="visits-table">
+        <thead>
+            <tr>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Date</th>
+                <th>Heure d'entrée</th>
+                <th>Heure de sortie</th>
+                <th>Type de visite</th>
+                <th>Local</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
 </body>
 </html>
