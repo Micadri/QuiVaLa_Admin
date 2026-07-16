@@ -1,11 +1,8 @@
 import { fetchVisits } from './api.js';
 
 let currentVisits = []; 
-let filteredHistoryVisits = []; // Stockage spécifique pour les résultats filtrés de l'historique
+let filteredHistoryVisits = []; 
 
-/**
- * Rendu générique des lignes dans un tableau ciblé.
- */
 const displayVisitsInTable = (visits, tableSelector) => {
     const tableBody = document.querySelector(`${tableSelector} tbody`);
     if (!tableBody) return;
@@ -41,16 +38,13 @@ const displayVisitsInTable = (visits, tableSelector) => {
             <td style="padding: 10px;">${acf.heure_entree || '-'}</td>
             <td style="padding: 10px;">${acf.heure_sortie || '-'}</td>
             <td style="padding: 10px;">${displayedTarget}</td>
-            <td style="padding: 10px;">${displayedRoom}</td>
+            <td style="padding: 10px;">${displayedRoom || '-'}</td>
         `;
         
         tableBody.appendChild(tr);
     });
 };
 
-/**
- * Récupère les données de l'API et initialise les deux tableaux.
- */
 export const renderVisitsTable = async () => {
     const tableBody = document.querySelector('#visits-table tbody');
     if (!tableBody) return;
@@ -59,9 +53,8 @@ export const renderVisitsTable = async () => {
         tableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">Chargement des données...</td></tr>';
         
         currentVisits = await fetchVisits();
-        filteredHistoryVisits = [...currentVisits]; // Par défaut, l'historique contient tout
+        filteredHistoryVisits = [...currentVisits]; 
         
-        // On affiche les données dans les deux vues
         displayVisitsInTable(currentVisits, '#visits-table');
         displayVisitsInTable(filteredHistoryVisits, '#history-table');
         
@@ -70,9 +63,6 @@ export const renderVisitsTable = async () => {
     }
 };
 
-/**
- * Filtre les visites de la section principale (recherche textuelle directe).
- */
 export const filterVisits = (query) => {
     const lowerQuery = query.toLowerCase();
     
@@ -102,9 +92,6 @@ export const filterVisits = (query) => {
     displayVisitsInTable(filtered, '#visits-table');
 };
 
-/**
- * Convertit une date "JJ/MM/AAAA" en objet Date Javascript pour comparaison.
- */
 const parseFrenchDate = (dateStr) => {
     if (!dateStr) return null;
     const parts = dateStr.split('/');
@@ -113,39 +100,53 @@ const parseFrenchDate = (dateStr) => {
 };
 
 /**
- * Filtre l'historique selon une plage de dates (Debut -> Fin).
+ * Filtre l'historique selon les 4 critères (Date début, Date fin, Type, Local)
  */
-export const filterHistoryByDate = (startDateVal, endDateVal) => {
+export const applyHistoryFilters = (startDateVal, endDateVal, typeVal, localVal) => {
     const startDate = startDateVal ? new Date(startDateVal) : null;
     const endDate = endDateVal ? new Date(endDateVal) : null;
 
-    // Si des dates sont saisies, on réinitialise leurs heures pour comparer uniquement les jours
     if (startDate) startDate.setHours(0, 0, 0, 0);
     if (endDate) endDate.setHours(23, 59, 59, 999);
+    
+    const lowerType = (typeVal || '').toLowerCase();
+    const lowerLocal = (localVal || '').toLowerCase();
 
     filteredHistoryVisits = currentVisits.filter(visit => {
-        const visitDateObj = parseFrenchDate(visit.acf ? visit.acf.date : '');
-        if (!visitDateObj) return false;
+        const acf = visit.acf || {};
+        const details = visit.details_complets || {};
 
-        if (startDate && visitDateObj < startDate) return false;
-        if (endDate && visitDateObj > endDate) return false;
+        // 1. Filtre par Date
+        const visitDateObj = parseFrenchDate(acf.date || '');
+        if (startDate && (!visitDateObj || visitDateObj < startDate)) return false;
+        if (endDate && (!visitDateObj || visitDateObj > endDate)) return false;
 
-        return true;
+        // 2. Filtre par Type de visite
+        const visitType = (acf['visite-type'] || '').toLowerCase();
+        if (lowerType && visitType !== lowerType) return false;
+
+        // 3. Filtre par Local
+        let room = '';
+        if (details.personnel) {
+            room = (details.personnel['personnel-local'] || details.personnel['local'] || '').toLowerCase();
+        } else if (details.formation) {
+            room = (details.formation['formation-local'] || '').toLowerCase();
+        }
+        if (lowerLocal && !room.includes(lowerLocal)) return false;
+
+        return true; // Si la ligne passe tous les tests, on la garde
     });
 
     displayVisitsInTable(filteredHistoryVisits, '#history-table');
 };
 
-/**
- * Réinitialise les filtres temporels de l'historique.
- */
 export const resetHistoryFilter = () => {
     filteredHistoryVisits = [...currentVisits];
     displayVisitsInTable(filteredHistoryVisits, '#history-table');
 };
 
 /**
- * Génère et télécharge un fichier CSV basé sur les données actuellement filtrées de l'historique.
+ * Exporte uniquement le tableau filtré (filteredHistoryVisits) en CSV.
  */
 export const exportToCSV = () => {
     if (filteredHistoryVisits.length === 0) {
@@ -153,10 +154,8 @@ export const exportToCSV = () => {
         return;
     }
 
-    // Entêtes du CSV
     const headers = ["Prenom", "Nom", "Email", "Date", "Heure Entree", "Heure Sortie", "Rendez-vous", "Localisation"];
-    
-    const csvRows = [headers.join(';')]; // Utilisation du point-virgule pour Excel FR
+    const csvRows = [headers.join(';')]; 
 
     filteredHistoryVisits.forEach(visit => {
         const acf = visit.acf || {};
@@ -181,20 +180,19 @@ export const exportToCSV = () => {
             acf.date || '',
             acf.heure_entree || '',
             acf.heure_sortie || '',
-            target,
-            room
+            target || '',
+            room || ''
         ];
 
-        // Nettoyage pour éviter que des points-virgules cassent les colonnes CSV
-        const safeRow = row.map(val => `"${val.toString().replace(/"/g, '""')}"`);
+        // Formatage blindé : on force tout en chaîne de caractères, et on échappe les guillemets
+        const safeRow = row.map(val => `"${String(val).replace(/"/g, '""')}"`);
         csvRows.push(safeRow.join(';'));
     });
 
-    // Encodage UTF-8 avec BOM (\uFEFF) pour forcer Excel à lire correctement les accents français
     const csvContent = "\uFEFF" + csvRows.join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     
-    // Téléchargement automatique
+    // Création du lien de téléchargement
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);

@@ -3,7 +3,7 @@ import { protectRoute, redirectIfLoggedIn } from './router.js';
 import { 
     renderVisitsTable, 
     filterVisits, 
-    filterHistoryByDate, 
+    applyHistoryFilters, 
     resetHistoryFilter, 
     exportToCSV 
 } from './dashboard.js';
@@ -65,22 +65,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isHistoryHidden = historySection.classList.contains('hidden');
                 
                 if (isHistoryHidden) {
-                    // On affiche l'historique
                     historySection.classList.remove('hidden');
                     mainSection.classList.add('hidden');
                     toggleHistoryBtn.textContent = "Retour à l'accueil";
-                    toggleHistoryBtn.style.backgroundColor = "#6c757d"; // Devient gris
+                    toggleHistoryBtn.style.backgroundColor = "#6c757d"; 
                 } else {
-                    // On retourne à l'accueil
                     historySection.classList.add('hidden');
                     mainSection.classList.remove('hidden');
                     toggleHistoryBtn.textContent = "Voir l'historique";
-                    toggleHistoryBtn.style.backgroundColor = "#007bff"; // Devient bleu
+                    toggleHistoryBtn.style.backgroundColor = "#007bff"; 
                 }
             });
         }
 
-        // Écouteur pour la barre de recherche (recherche en direct)
+        // Recherche en direct (Section principale)
         const searchInput = document.getElementById('search-input');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -88,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Écouteur pour le bouton Rafraîchir
         const refreshBtn = document.getElementById('refresh-btn');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
@@ -97,21 +94,29 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // --- FILTRES DE DATES DE L'HISTORIQUE ---
-        const btnApplyDate = document.getElementById('btn-apply-date-filter');
-        if (btnApplyDate) {
-            btnApplyDate.addEventListener('click', () => {
+        // --- FILTRES DE L'HISTORIQUE (Dates, Type, Local) ---
+        const btnApplyFilters = document.getElementById('btn-apply-filters');
+        if (btnApplyFilters) {
+            btnApplyFilters.addEventListener('click', () => {
                 const startVal = document.getElementById('filter-start-date').value;
                 const endVal = document.getElementById('filter-end-date').value;
-                filterHistoryByDate(startVal, endVal);
+                const typeVal = document.getElementById('filter-type').value;
+                const localVal = document.getElementById('filter-local').value;
+                
+                // On applique les 4 filtres d'un coup
+                applyHistoryFilters(startVal, endVal, typeVal, localVal);
             });
         }
 
-        const btnResetDate = document.getElementById('btn-reset-date-filter');
-        if (btnResetDate) {
-            btnResetDate.addEventListener('click', () => {
+        // --- RÉINITIALISATION DES FILTRES ---
+        const btnResetFilters = document.getElementById('btn-reset-filters');
+        if (btnResetFilters) {
+            btnResetFilters.addEventListener('click', () => {
                 document.getElementById('filter-start-date').value = '';
                 document.getElementById('filter-end-date').value = '';
+                document.getElementById('filter-type').value = '';
+                document.getElementById('filter-local').value = '';
+                
                 resetHistoryFilter();
             });
         }
