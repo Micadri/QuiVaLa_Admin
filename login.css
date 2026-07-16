@@ -1,0 +1,61 @@
+.login-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-bento-card {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 50px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-soft);
+    text-align: center;
+}
+
+.login-bento-card h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: var(--accent-color);
+}
+
+.login-bento-card p {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.login-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: left;
+    margin-bottom: 25px;
+}
+
+.login-form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.login-bento-card button {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: var(--radius-sm);
+}
+
+.error-message {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}

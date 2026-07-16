@@ -1,119 +1,100 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
+<html lang="fr" data-theme="dark"> <head>
     <meta charset="UTF-8">
-    <title>Dashboard Admin</title>
-    <style>
-        .hidden {
-            display: none !important;
-        }
-        .flex-bar {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .filter-bar {
-            background-color: #f8f9fa; 
-            padding: 15px; 
-            border-radius: 5px; 
-            border: 1px solid #ddd;
-            flex-wrap: wrap; /* Permet aux filtres de passer à la ligne si besoin */
-        }
-        button {
-            cursor: pointer;
-            padding: 6px 12px;
-        }
-        input, select {
-            padding: 5px;
-        }
-    </style>
+    <title>Dashboard Admin - QuiVaLa</title>
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="dashboard.css">
     <script type="module" src="main.js"></script>
 </head>
 <body>
-    <h1>Tableau de bord "Qui Va Là ?"</h1>
-    
-    <h2 id="welcome-message"></h2>
-    
-    <div class="flex-bar">
-        <button id="logout-btn">Se déconnecter</button>
-        <button id="toggle-history-btn" style="background-color: #007bff; color: white; border: none; border-radius: 4px;">Voir l'historique</button>
-    </div>
-    <hr>
+    <button id="theme-toggle" class="theme-toggle-btn">🌙</button>
 
-    <div id="main-section">
-        <h3>Visites du jour & Recherche rapide</h3>
-        <div class="flex-bar">
-            <input type="text" id="search-input" placeholder="Rechercher par nom, email, formation, personnel ou local..." style="width: 400px;">
-            <button id="refresh-btn">Rafraîchir les données</button>
-        </div>
-
-        <table border="1" id="visits-table" style="width: 100%; border-collapse: collapse; text-align: left;">
-            <thead>
-                <tr style="background-color: #f2f2f2;">
-                    <th style="padding: 10px;">Prénom</th>
-                    <th style="padding: 10px;">Nom</th>
-                    <th style="padding: 10px;">Date</th>
-                    <th style="padding: 10px;">Heure d'entrée</th>
-                    <th style="padding: 10px;">Heure de sortie</th>
-                    <th style="padding: 10px;">Type de visite</th>
-                    <th style="padding: 10px;">Local</th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
-    </div>
-
-    <div id="history-section" class="hidden">
-        <h3>Historique global des visites</h3>
+    <div class="dashboard-wrapper bento-grid">
         
-        <div class="flex-bar filter-bar">
+        <div class="bento-card header-card">
             <div>
-                <label for="filter-start-date">Du :</label>
-                <input type="date" id="filter-start-date">
+                <h1 style="font-size: 16px; color: var(--text-secondary); margin-bottom: 5px;">Qui Va Là ?</h1>
+                <h2 id="welcome-message">Bienvenue</h2>
             </div>
-            <div>
-                <label for="filter-end-date">Au :</label>
-                <input type="date" id="filter-end-date">
+            <div style="display: flex; gap: 10px;">
+                <button id="toggle-history-btn" class="primary">Voir l'historique</button>
+                <button id="logout-btn" class="danger">Déconnexion</button>
             </div>
-            
-            <div>
-                <label for="filter-type">Motif :</label>
-                <select id="filter-type">
-                    <option value="">Tous</option>
-                    <option value="Visite">Visite</option>
-                    <option value="Formation">Formation</option>
-                </select>
-            </div>
-            
-            <div>
-                <label for="filter-local">Local :</label>
-                <input type="text" id="filter-local" placeholder="Ex: Salle B...">
-            </div>
-
-            <button id="btn-apply-filters" style="background-color: #28a745; color: white; border: none; border-radius: 4px;">Filtrer</button>
-            <button id="btn-reset-filters">Réinitialiser</button>
-            
-            <button id="btn-export-csv" style="background-color: #dc3545; color: white; border: none; border-radius: 4px; margin-left: auto;">Exporter en CSV</button>
         </div>
 
-        <table border="1" id="history-table" style="width: 100%; border-collapse: collapse; text-align: left; margin-top: 15px;">
-            <thead>
-                <tr style="background-color: #f2f2f2;">
-                    <th style="padding: 10px;">Prénom</th>
-                    <th style="padding: 10px;">Nom</th>
-                    <th style="padding: 10px;">Date</th>
-                    <th style="padding: 10px;">Heure d'entrée</th>
-                    <th style="padding: 10px;">Heure de sortie</th>
-                    <th style="padding: 10px;">Type de visite</th>
-                    <th style="padding: 10px;">Local</th>
-                </tr>
-            </thead>
-            <tbody>
-                </tbody>
-        </table>
-    </div>
+        <div id="main-section" class="bento-grid">
+            <div class="bento-card">
+                <div class="filter-bar">
+                    <input type="text" id="search-input" placeholder="🔍 Rechercher par nom, email, formation, local..." style="flex-grow: 1;">
+                    <button id="refresh-btn">🔄 Actualiser</button>
+                </div>
+            </div>
 
+            <div class="bento-card table-container">
+                <table id="visits-table">
+                    <thead>
+                        <tr>
+                            <th>Prénom</th>
+                            <th>Nom</th>
+                            <th>Date</th>
+                            <th>Arrivée</th>
+                            <th>Départ</th>
+                            <th>Cible</th>
+                            <th>Local</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="history-section" class="hidden bento-grid">
+            <div class="bento-card">
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>Du :</label>
+                        <input type="date" id="filter-start-date">
+                    </div>
+                    <div class="filter-group">
+                        <label>Au :</label>
+                        <input type="date" id="filter-end-date">
+                    </div>
+                    <div class="filter-group">
+                        <label>Motif :</label>
+                        <select id="filter-type">
+                            <option value="">Tous</option>
+                            <option value="Visite">Visite</option>
+                            <option value="Formation">Formation</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Local :</label>
+                        <input type="text" id="filter-local" placeholder="Ex: Salle B...">
+                    </div>
+                    <button id="btn-apply-filters" class="primary">Filtrer</button>
+                    <button id="btn-reset-filters">Effacer</button>
+                    <button id="btn-export-csv" class="danger" style="margin-left: auto;">⬇️ Exporter CSV</button>
+                </div>
+            </div>
+
+            <div class="bento-card table-container">
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>Prénom</th>
+                            <th>Nom</th>
+                            <th>Date</th>
+                            <th>Arrivée</th>
+                            <th>Départ</th>
+                            <th>Cible</th>
+                            <th>Local</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
 </body>
 </html>

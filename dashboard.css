@@ -1,0 +1,86 @@
+.dashboard-wrapper {
+    padding: 30px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* BENTO GRID SYSTEM */
+.bento-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: 1fr;
+}
+
+.bento-card {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    box-shadow: var(--shadow-soft);
+}
+
+/* EN-TÊTE */
+.header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-card h2 { color: var(--accent-color); font-size: 24px; }
+
+/* BARRE DE FILTRES */
+.filter-bar {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.filter-group label { color: var(--text-secondary); font-size: 14px; }
+
+/* DESIGN DES TABLEAUX */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+}
+
+th, td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 15px;
+}
+
+th {
+    background-color: rgba(0, 0, 0, 0.02);
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+[data-theme="dark"] th { background-color: rgba(255, 255, 255, 0.02); }
+
+tr { transition: background-color 0.2s; }
+tr:hover { background-color: rgba(212, 175, 55, 0.03); }
+
+/* STATUS PILL (Optionnel pour rendre joli) */
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--accent-color);
+}

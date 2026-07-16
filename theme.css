@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
+
+:root {
+    /* MODE CLAIR (Défaut) */
+    --bg-color: #f4f5f7;
+    --surface-color: #ffffff;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --border-color: #e5e7eb;
+    --accent-color: #b8860b; /* Or sombre */
+    --accent-hover: #996515;
+    --danger-color: #ef4444;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 8px;
+    --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+    /* MODE SOMBRE (Dark Luxury) */
+    --bg-color: #0a0a0a;
+    --surface-color: #141414;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --accent-color: #d4af37; /* Or éclatant */
+    --accent-hover: #f1c40f;
+    --danger-color: #ef4444;
+    --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    transition: var(--transition);
+    min-height: 100vh;
+}
+
+h1, h2, h3 { font-weight: 500; letter-spacing: -0.02em; }
+
+/* BOUTONS GLOBAUX */
+button {
+    background-color: var(--surface-color);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+button:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+button.primary {
+    background-color: var(--accent-color);
+    color: #000;
+    border: none;
+}
+
+button.primary:hover {
+    background-color: var(--accent-hover);
+    color: #000;
+}
+
+button.danger { background-color: transparent; border-color: var(--danger-color); color: var(--danger-color); }
+button.danger:hover { background-color: var(--danger-color); color: #fff; }
+
+/* INPUTS GLOBAUX */
+input, select {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    transition: var(--transition);
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+/* BOUTON THEME TOGGLE */
+.theme-toggle-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-soft);
+    font-size: 24px;
+    padding: 0;
+    z-index: 999;
+}
+.hidden { display: none !important; }

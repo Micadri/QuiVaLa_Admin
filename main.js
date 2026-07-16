@@ -8,7 +8,34 @@ import {
     exportToCSV 
 } from './dashboard.js';
 
+// --- GESTION DU THÈME SOMBRE / CLAIR ---
+const initTheme = () => {
+    const themeBtn = document.getElementById('theme-toggle');
+    if (!themeBtn) return;
+
+    // Récupérer la préférence sauvegardée, ou forcer 'dark' par défaut (Dark Luxury)
+    const savedTheme = localStorage.getItem('quivala-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeBtn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('quivala-theme', newTheme);
+        themeBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    });
+};
+
+// ==========================================
+// POINT D'ENTRÉE PRINCIPAL (UN SEUL ECOUTEUR)
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. Initialisation du design
+    initTheme(); 
+
     const currentPath = window.location.pathname;
 
     // ==========================================
@@ -68,17 +95,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     historySection.classList.remove('hidden');
                     mainSection.classList.add('hidden');
                     toggleHistoryBtn.textContent = "Retour à l'accueil";
+                    toggleHistoryBtn.classList.remove('primary');
                     toggleHistoryBtn.style.backgroundColor = "#6c757d"; 
+                    toggleHistoryBtn.style.color = "#fff";
                 } else {
                     historySection.classList.add('hidden');
                     mainSection.classList.remove('hidden');
                     toggleHistoryBtn.textContent = "Voir l'historique";
-                    toggleHistoryBtn.style.backgroundColor = "#007bff"; 
+                    toggleHistoryBtn.classList.add('primary');
+                    toggleHistoryBtn.style.backgroundColor = ""; // Reset du bg inline
                 }
             });
         }
 
-        // Recherche en direct (Section principale)
+        // --- RECHERCHE EN DIRECT (Section principale) ---
         const searchInput = document.getElementById('search-input');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
