@@ -1,11 +1,8 @@
 import { login, logout } from './auth.js';
 import { protectRoute, redirectIfLoggedIn } from './router.js';
-import { renderVisitsTable } from './dashboard.js'; 
+// NOUVEAU : Importation de filterVisits
+import { renderVisitsTable, filterVisits } from './dashboard.js';
 
-/**
- * Point d'entrée de l'application (Bootstrap).
- * Analyse le chemin actuel pour instancier la logique applicative correspondante.
- */
 document.addEventListener('DOMContentLoaded', () => {
     const currentPath = window.location.pathname;
 
@@ -14,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     if (currentPath.includes('login.html')) {
         redirectIfLoggedIn();
-
         const loginForm = document.getElementById('login-form');
         const errorDisplay = document.getElementById('login-error');
 
@@ -22,16 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 errorDisplay.style.display = 'none';
-
-                // Transformation directe des données du formulaire en objet littéral
+                
                 const formData = new FormData(e.target);
                 const credentials = Object.fromEntries(formData);
 
                 try {
                     await login(credentials);
-                    window.location.href = 'index.html'; 
+                    window.location.href = 'index.html';
                 } catch (error) {
-                    // Nettoyage préventif des balises HTML pouvant provenir des erreurs d'API WP
                     errorDisplay.textContent = error.message.replace(/(<([^>]+)>)/gi, "");
                     errorDisplay.style.display = 'block';
                 }
@@ -43,22 +37,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // LOGIQUE DU TABLEAU DE BORD (index.html)
     // ==========================================
     if (currentPath.includes('index.html') || currentPath.endsWith('/')) {
-        protectRoute(); 
+        protectRoute();
 
-        // Récupération de l'identité de l'administrateur de session
         const adminName = localStorage.getItem('adminName');
         const welcomeMessage = document.getElementById('welcome-message');
         if (welcomeMessage && adminName) {
             welcomeMessage.textContent = `Bienvenue, ${adminName} !`;
         }
 
-        // Attachement de l'événement de déconnexion
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', logout);
         }
 
-        // Lancement de la récupération et du rendu des données
-        renderVisitsTable(); 
+        // Écouteur pour la barre de recherche (réaction en direct à chaque frappe)
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                filterVisits(e.target.value);
+            });
+        }
+
+        // Écouteur pour le bouton Rafraîchir
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                if(searchInput) searchInput.value = ''; // On vide le champ de recherche
+                renderVisitsTable(); // On recharge les données depuis l'API
+            });
+        }
+
+        // Premier chargement de la table
+        renderVisitsTable();
     }
 });

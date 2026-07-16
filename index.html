@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Admin</title>
-     <script type="module" src="main.js"></script>
+    <script type="module" src="main.js"></script>
 </head>
 <body>
     <h1>Tableau de bord "Qui Va Là ?"</h1>
     
     <h2 id="welcome-message"></h2>
     <button id="logout-btn">Se déconnecter</button>
-
     <hr>
+
+    <!-- BLOC : Recherche & Rafraîchissement -->
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="search-input" placeholder="Rechercher par nom, email, formation, personnel ou local..." style="padding: 5px; width: 400px;">
+        <button id="refresh-btn" style="padding: 5px 15px;">Rafraîchir les données</button>
+    </div>
 
     <table border="1" id="visits-table">
         <thead>
@@ -26,7 +31,8 @@
             </tr>
         </thead>
         <tbody>
-            </tbody>
+            <!-- Injecté via JS -->
+        </tbody>
     </table>
 </body>
 </html>
