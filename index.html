@@ -3,36 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Admin</title>
+    <style>
+        .hidden {
+            display: none !important;
+        }
+        .flex-bar {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        button {
+            cursor: pointer;
+            padding: 6px 12px;
+        }
+        input, select {
+            padding: 5px;
+        }
+    </style>
     <script type="module" src="main.js"></script>
 </head>
 <body>
     <h1>Tableau de bord "Qui Va Là ?"</h1>
     
     <h2 id="welcome-message"></h2>
-    <button id="logout-btn">Se déconnecter</button>
+    
+    <div class="flex-bar">
+        <button id="logout-btn">Se déconnecter</button>
+        <button id="toggle-history-btn" style="background-color: #007bff; color: white; border: none; border-radius: 4px;">Voir l'historique</button>
+    </div>
     <hr>
 
-    <!-- BLOC : Recherche & Rafraîchissement -->
-    <div style="margin-bottom: 20px;">
-        <input type="text" id="search-input" placeholder="Rechercher par nom, email, formation, personnel ou local..." style="padding: 5px; width: 400px;">
-        <button id="refresh-btn" style="padding: 5px 15px;">Rafraîchir les données</button>
+    <div id="main-section">
+        <h3>Visites du jour & Recherche rapide</h3>
+        <div class="flex-bar">
+            <input type="text" id="search-input" placeholder="Rechercher par nom, email, formation, personnel ou local..." style="width: 400px;">
+            <button id="refresh-btn">Rafraîchir les données</button>
+        </div>
+
+        <table border="1" id="visits-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 10px;">Prénom</th>
+                    <th style="padding: 10px;">Nom</th>
+                    <th style="padding: 10px;">Date</th>
+                    <th style="padding: 10px;">Heure d'entrée</th>
+                    <th style="padding: 10px;">Heure de sortie</th>
+                    <th style="padding: 10px;">Type de visite</th>
+                    <th style="padding: 10px;">Local</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
     </div>
 
-    <table border="1" id="visits-table">
-        <thead>
-            <tr>
-                <th>Prénom</th>
-                <th>Nom</th>
-                <th>Date</th>
-                <th>Heure d'entrée</th>
-                <th>Heure de sortie</th>
-                <th>Type de visite</th>
-                <th>Local</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Injecté via JS -->
-        </tbody>
-    </table>
+    <div id="history-section" class="hidden">
+        <h3>Historique global des visites</h3>
+        
+        <div class="flex-bar" style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+            <div>
+                <label for="filter-start-date">Du :</label>
+                <input type="date" id="filter-start-date">
+            </div>
+            <div>
+                <label for="filter-end-date">Au :</label>
+                <input type="date" id="filter-end-date">
+            </div>
+            <button id="btn-apply-date-filter" style="background-color: #28a745; color: white; border: none; border-radius: 4px;">Filtrer</button>
+            <button id="btn-reset-date-filter">Réinitialiser</button>
+            <button id="btn-export-csv" style="background-color: #dc3545; color: white; border: none; border-radius: 4px; margin-left: auto;">Exporter en CSV</button>
+        </div>
+
+        <table border="1" id="history-table" style="width: 100%; border-collapse: collapse; text-align: left; margin-top: 15px;">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 10px;">Prénom</th>
+                    <th style="padding: 10px;">Nom</th>
+                    <th style="padding: 10px;">Date</th>
+                    <th style="padding: 10px;">Heure d'entrée</th>
+                    <th style="padding: 10px;">Heure de sortie</th>
+                    <th style="padding: 10px;">Type de visite</th>
+                    <th style="padding: 10px;">Local</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+
 </body>
 </html>

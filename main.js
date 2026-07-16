@@ -1,7 +1,12 @@
 import { login, logout } from './auth.js';
 import { protectRoute, redirectIfLoggedIn } from './router.js';
-// NOUVEAU : Importation de filterVisits
-import { renderVisitsTable, filterVisits } from './dashboard.js';
+import { 
+    renderVisitsTable, 
+    filterVisits, 
+    filterHistoryByDate, 
+    resetHistoryFilter, 
+    exportToCSV 
+} from './dashboard.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const currentPath = window.location.pathname;
@@ -50,7 +55,32 @@ document.addEventListener('DOMContentLoaded', () => {
             logoutBtn.addEventListener('click', logout);
         }
 
-        // Écouteur pour la barre de recherche (réaction en direct à chaque frappe)
+        // --- GESTION DU TOGGLE HISTORIQUE/VUE ACTIVE ---
+        const toggleHistoryBtn = document.getElementById('toggle-history-btn');
+        const mainSection = document.getElementById('main-section');
+        const historySection = document.getElementById('history-section');
+
+        if (toggleHistoryBtn && mainSection && historySection) {
+            toggleHistoryBtn.addEventListener('click', () => {
+                const isHistoryHidden = historySection.classList.contains('hidden');
+                
+                if (isHistoryHidden) {
+                    // On affiche l'historique
+                    historySection.classList.remove('hidden');
+                    mainSection.classList.add('hidden');
+                    toggleHistoryBtn.textContent = "Retour à l'accueil";
+                    toggleHistoryBtn.style.backgroundColor = "#6c757d"; // Devient gris
+                } else {
+                    // On retourne à l'accueil
+                    historySection.classList.add('hidden');
+                    mainSection.classList.remove('hidden');
+                    toggleHistoryBtn.textContent = "Voir l'historique";
+                    toggleHistoryBtn.style.backgroundColor = "#007bff"; // Devient bleu
+                }
+            });
+        }
+
+        // Écouteur pour la barre de recherche (recherche en direct)
         const searchInput = document.getElementById('search-input');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -62,12 +92,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const refreshBtn = document.getElementById('refresh-btn');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
-                if(searchInput) searchInput.value = ''; // On vide le champ de recherche
-                renderVisitsTable(); // On recharge les données depuis l'API
+                if(searchInput) searchInput.value = ''; 
+                renderVisitsTable(); 
             });
         }
 
-        // Premier chargement de la table
+        // --- FILTRES DE DATES DE L'HISTORIQUE ---
+        const btnApplyDate = document.getElementById('btn-apply-date-filter');
+        if (btnApplyDate) {
+            btnApplyDate.addEventListener('click', () => {
+                const startVal = document.getElementById('filter-start-date').value;
+                const endVal = document.getElementById('filter-end-date').value;
+                filterHistoryByDate(startVal, endVal);
+            });
+        }
+
+        const btnResetDate = document.getElementById('btn-reset-date-filter');
+        if (btnResetDate) {
+            btnResetDate.addEventListener('click', () => {
+                document.getElementById('filter-start-date').value = '';
+                document.getElementById('filter-end-date').value = '';
+                resetHistoryFilter();
+            });
+        }
+
+        // --- BOUTON EXPORT CSV ---
+        const btnExport = document.getElementById('btn-export-csv');
+        if (btnExport) {
+            btnExport.addEventListener('click', exportToCSV);
+        }
+
+        // Premier chargement de la table globale
         renderVisitsTable();
     }
 });
