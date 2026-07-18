@@ -3,6 +3,63 @@ import { fetchVisits } from './api.js';
 let currentVisits = []; 
 let filteredHistoryVisits = []; 
 
+/**
+ * NOUVEAU : Formateur de date/heure depuis la donnée brute WordPress
+ * Isole la date et l'heure au format "14h25" sans subir les décalages de fuseau horaire.
+ */
+const formatWPEntry = (wpDateString) => {
+    if (!wpDateString) return { date: '-', time: '-' };
+    
+    // wpDateString ressemble à "2026-07-18T14:25:00"
+    const parts = wpDateString.split('T');
+    if (parts.length !== 2) return { date: '-', time: '-' };
+
+    const [year, month, day] = parts[0].split('-');
+    const [hours, minutes] = parts[1].split(':');
+
+    return {
+        date: `${day}/${month}/${year}`,
+        time: `${hours}h${minutes}`
+    };
+};
+
+/**
+ * NOUVEAU : Convertisseur d'heure de sortie "Intelligent"
+ * Règle le problème du format 12h anglais d'ACF (ex: "4:17" devient "16h17")
+ */
+const formatExitTime = (exitStr, entryTimeFormatted) => {
+    if (!exitStr) return '-';
+    
+    const match = exitStr.trim().match(/^(\d{1,2})[:h](\d{2})\s*(am|pm)?$/i);
+    if (!match) return exitStr.replace(':', 'h');
+
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const modifier = match[3] ? match[3].toLowerCase() : null;
+
+    if (modifier === 'pm' && hours < 12) {
+        hours += 12;
+    } else if (modifier === 'am' && hours === 12) {
+        hours = 0;
+    } else if (!modifier) {
+        // Comparaison avec l'heure d'entrée pour deviner l'après-midi
+        let entryHour = 0;
+        if (entryTimeFormatted && entryTimeFormatted !== '-') {
+            entryHour = parseInt(entryTimeFormatted.split('h')[0], 10);
+        }
+        
+        // Si l'heure de sortie (ex: 4) est plus petite que l'entrée (ex: 14), on ajoute 12h
+        if (hours < entryHour && hours < 12) {
+            hours += 12;
+        } else if (hours >= 1 && hours <= 7 && entryHour === 0) {
+            // Sécurité : les départs entre 1h et 7h du matin sont convertis en après-midi
+            hours += 12;
+        }
+    }
+
+    return `${String(hours).padStart(2, '0')}h${minutes}`;
+};
+
 const displayVisitsInTable = (visits, tableSelector) => {
     const tableBody = document.querySelector(`${tableSelector} tbody`);
     if (!tableBody) return;
@@ -19,6 +76,10 @@ const displayVisitsInTable = (visits, tableSelector) => {
         const details = visit.details_complets || {};
         const visitor = details.visiteur || {};
         
+        // Utilisation des formateurs ultra-précis
+        const { date: displayedDate, time: displayedEntryTime } = formatWPEntry(visit.date);
+        const displayedExitTime = formatExitTime(acf.heure_sortie, displayedEntryTime);
+        
         let displayedTarget = '-';
         let displayedRoom = '-';
 
@@ -34,9 +95,9 @@ const displayVisitsInTable = (visits, tableSelector) => {
         tr.innerHTML = `
             <td style="padding: 10px;">${visitor['visiteur-prenom'] || '-'}</td>
             <td style="padding: 10px;">${visitor['visiteur-nom'] || '-'}</td>
-            <td style="padding: 10px;">${acf.date || '-'}</td>
-            <td style="padding: 10px;">${acf.heure_entree || '-'}</td>
-            <td style="padding: 10px;">${acf.heure_sortie || '-'}</td>
+            <td style="padding: 10px;">${displayedDate}</td>
+            <td style="padding: 10px;">${displayedEntryTime}</td>
+            <td style="padding: 10px;">${displayedExitTime}</td>
             <td style="padding: 10px;">${displayedTarget}</td>
             <td style="padding: 10px;">${displayedRoom || '-'}</td>
         `;
@@ -92,13 +153,6 @@ export const filterVisits = (query) => {
     displayVisitsInTable(filtered, '#visits-table');
 };
 
-const parseFrenchDate = (dateStr) => {
-    if (!dateStr) return null;
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) return null;
-    return new Date(parts[2], parts[1] - 1, parts[0]);
-};
-
 /**
  * Filtre l'historique selon les 4 critères (Date début, Date fin, Type, Local)
  */
@@ -116,8 +170,10 @@ export const applyHistoryFilters = (startDateVal, endDateVal, typeVal, localVal)
         const acf = visit.acf || {};
         const details = visit.details_complets || {};
 
-        // 1. Filtre par Date
-        const visitDateObj = parseFrenchDate(acf.date || '');
+        // 1. Filtre par Date (On extrait précisément le jour sans les heures)
+        const visitDateObj = visit.date ? new Date(visit.date.split('T')[0]) : null;
+        if (visitDateObj) visitDateObj.setHours(0, 0, 0, 0);
+
         if (startDate && (!visitDateObj || visitDateObj < startDate)) return false;
         if (endDate && (!visitDateObj || visitDateObj > endDate)) return false;
 
@@ -134,7 +190,7 @@ export const applyHistoryFilters = (startDateVal, endDateVal, typeVal, localVal)
         }
         if (lowerLocal && !room.includes(lowerLocal)) return false;
 
-        return true; // Si la ligne passe tous les tests, on la garde
+        return true; 
     });
 
     displayVisitsInTable(filteredHistoryVisits, '#history-table');
@@ -162,6 +218,10 @@ export const exportToCSV = () => {
         const details = visit.details_complets || {};
         const visitor = details.visiteur || {};
         
+        // On s'assure d'avoir la belle heure de sortie dans le fichier Excel !
+        const { date: displayedDate, time: displayedEntryTime } = formatWPEntry(visit.date);
+        const displayedExitTime = formatExitTime(acf.heure_sortie, displayedEntryTime);
+        
         let target = '-';
         let room = '-';
 
@@ -177,14 +237,13 @@ export const exportToCSV = () => {
             visitor['visiteur-prenom'] || '',
             visitor['visiteur-nom'] || '',
             visitor['visiteur-email'] || '',
-            acf.date || '',
-            acf.heure_entree || '',
-            acf.heure_sortie || '',
+            displayedDate,
+            displayedEntryTime,
+            displayedExitTime,
             target || '',
             room || ''
         ];
 
-        // Formatage blindé : on force tout en chaîne de caractères, et on échappe les guillemets
         const safeRow = row.map(val => `"${String(val).replace(/"/g, '""')}"`);
         csvRows.push(safeRow.join(';'));
     });
@@ -192,7 +251,6 @@ export const exportToCSV = () => {
     const csvContent = "\uFEFF" + csvRows.join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     
-    // Création du lien de téléchargement
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
